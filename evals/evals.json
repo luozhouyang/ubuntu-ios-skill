@@ -1,0 +1,56 @@
+{
+  "skill_name": "ubuntu-ios",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just installed Ubuntu 24.04 on an x86_64 machine. I have Xcode_26.6_Universal.xip in ~/Downloads and I need to build a SwiftUI iPhone app here without a Mac. Set up the ubuntu-ios toolchain and prove it works.",
+      "expected_output": "Installs dependencies, Swift, xtool, rcodesign, pymobiledevice3, and the Darwin SDK from the supplied .xip; creates the launcher; runs doctor; performs an end-to-end SwiftUI build.",
+      "files": [],
+      "expectations": [
+        "Installs liblzma-dev (or otherwise resolves the unxip lzma.h failure)",
+        "Uses the user's Xcode .xip and registers darwin in swift sdk list",
+        "Creates or uses ~/.local/bin/ubuntu-ios with the private library paths",
+        "Runs ubuntu-ios doctor and reports the expected no-device state",
+        "Builds a new SwiftUI project and confirms an arm64 Mach-O .app"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My Ubuntu box must use the corporate proxy http://127.0.0.1:7897. The ubuntu-ios installer fails during apt with 'Unable to connect to archive.ubuntu.com', and xtool sdk build later fails with HTTPClientError.connectTimeout. Walk me through fixing both and continue the install.",
+      "expected_output": "Explains that sudo strips proxy variables and configures apt explicitly; sets XTL_HTTP_PROXY in host:port form for xtool; re-runs the installer and verifies the SDK.",
+      "files": [],
+      "expectations": [
+        "Configures apt to use the proxy (config file or explicit sudo env assignments)",
+        "Sets XTL_HTTP_PROXY=127.0.0.1:7897 without a scheme",
+        "Does not recommend a system-wide library replacement",
+        "Continues to a successful SDK registration and doctor run"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The ubuntu-ios installer is stuck cloning swift-syntax. The log shows: git clone ... --mirror https://github.com/swiftlang/swift-syntax.git /home/me/.cache/org.swift.swiftpm/repositories/swift-syntax-e1f983d3. Give me the exact manual command to prefetch it and then continue the installation without losing progress.",
+      "expected_output": "Stops the running clone/installer, removes the partial directory, mirror-clones into the exact -e1f983d3 path, verifies it is bare, and restarts the installer.",
+      "files": [],
+      "expectations": [
+        "Uses the exact cache path with the -e1f983d3 suffix",
+        "Uses a --mirror bare clone, not a normal working-tree clone",
+        "Tells the user to stop the running installer/SwiftPM first",
+        "Verifies with rev-parse --is-bare-repository",
+        "Restarts the installer and keeps the already-built SDK/OAM work"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "ubuntu-ios is already working on my machine. I need to convert MyApp.xcodeproj, build it, and upload the build to TestFlight. I have an App Store Connect API key. What exactly do I run, and what must I keep out of git?",
+      "expected_output": "Runs ubuntu-ios convert with target/out/bundle-id, builds from the adapter directory, exports ASC_KEY_PATH/ASC_ISSUER_ID/ASC_KEY_ID, runs ubuntu-ios ship --upload, and calls out secrets and Apple SDK redistribution rules.",
+      "files": [],
+      "expectations": [
+        "Uses ubuntu-ios convert with --target, --out, and --bundle-id",
+        "Builds from the generated adapter directory",
+        "Exports ASC_KEY_PATH, ASC_ISSUER_ID, and ASC_KEY_ID before ship --upload",
+        "Keeps the .p8 key outside the repository",
+        "Mentions that upload does not submit the app for review"
+      ]
+    }
+  ]
+}
