@@ -35,7 +35,7 @@
 - 移动：`evals/` → `skills/ubuntu-ios/evals/`
 - 创建：`.gitignore`
 
-- [ ] **步骤 1：写一个当前会失败的布局检查**
+- [x] **步骤 1：写一个当前会失败的布局检查**
 
 运行：
 
@@ -49,7 +49,7 @@ test -f skills/ubuntu-ios/SKILL.md \
 
 预期：退出码 1（新路径尚不存在）。
 
-- [ ] **步骤 2：移动文件**
+- [x] **步骤 2：移动文件**
 
 运行：
 
@@ -60,7 +60,7 @@ git mv SKILL.md references scripts assets evals skills/ubuntu-ios/
 
 预期：`git status` 显示 5 个重命名。
 
-- [ ] **步骤 3：验证布局与脚本语法**
+- [x] **步骤 3：验证布局与脚本语法**
 
 运行：
 
@@ -86,7 +86,7 @@ bash -n skills/ubuntu-ios/scripts/setup.sh \
 
 预期：退出码 0，无输出。
 
-- [ ] **步骤 4：创建 `.gitignore`**
+- [x] **步骤 4：创建 `.gitignore`**
 
 写入 `.gitignore`：
 
@@ -99,7 +99,7 @@ node_modules/
 .worktrees/
 ```
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add .gitignore skills/
@@ -114,7 +114,7 @@ git commit -m "refactor: move skill content under skills/ubuntu-ios"
 - 创建：`tools/check-version.mjs`
 - 创建：`package.json`
 
-- [ ] **步骤 1：编写版本检查脚本**
+- [x] **步骤 1：编写版本检查脚本**
 
 写入 `tools/check-version.mjs`：
 
@@ -170,7 +170,7 @@ console.log(
 )
 ```
 
-- [ ] **步骤 2：运行脚本确认失败**
+- [x] **步骤 2：运行脚本确认失败**
 
 运行：
 
@@ -180,7 +180,7 @@ node tools/check-version.mjs
 
 预期：退出码 1，报错包含 `ENOENT` 和 `package.json`（文件尚不存在）。
 
-- [ ] **步骤 3：创建 `package.json`**
+- [x] **步骤 3：创建 `package.json`**
 
 写入 `package.json`：
 
@@ -229,7 +229,7 @@ node tools/check-version.mjs
 }
 ```
 
-- [ ] **步骤 4：运行版本检查确认通过**
+- [x] **步骤 4：运行版本检查确认通过**
 
 运行：
 
@@ -243,7 +243,7 @@ node tools/check-version.mjs
 ok: ubuntu-ios-skill@1.0.0 <-> skills/ubuntu-ios (ubuntu-ios@1.0.0)
 ```
 
-- [ ] **步骤 5：确认 tarball 只包含 skill 内容**
+- [x] **步骤 5：确认 tarball 只包含 skill 内容**
 
 运行：
 
@@ -253,7 +253,7 @@ npm pack --dry-run
 
 预期：文件列表包含 `package.json` 与 `skills/ubuntu-ios/` 下的文件；不包含 `tools/`、`docs/`、`.github/`、`.gitignore`。
 
-- [ ] **步骤 6：Commit**
+- [x] **步骤 6：Commit**
 
 ```bash
 git add package.json tools/check-version.mjs
@@ -268,7 +268,7 @@ git commit -m "feat: add npm package metadata and version check"
 - 创建：`README.md`
 - 创建：`LICENSE`
 
-- [ ] **步骤 1：写入 MIT 许可证**
+- [x] **步骤 1：写入 MIT 许可证**
 
 写入 `LICENSE`：
 
@@ -296,7 +296,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-- [ ] **步骤 2：写入 README**
+- [x] **步骤 2：写入 README**
 
 写入 `README.md`：
 
@@ -396,7 +396,7 @@ provenance.
 MIT
 ```
 
-- [ ] **步骤 3：验证 README 拼写与打包内容**
+- [x] **步骤 3：验证 README 拼写与打包内容**
 
 运行：
 
@@ -415,7 +415,7 @@ grep -n '^ubuntu-ios doctor$' README.md
 
 预期：输出包含 `ubuntu-ios doctor` 这一行（确认命令拼写正确）。
 
-- [ ] **步骤 4：Commit**
+- [x] **步骤 4：Commit**
 
 ```bash
 git add README.md LICENSE
@@ -430,7 +430,7 @@ git commit -m "docs: add npm readme and MIT license"
 - 创建：`.github/workflows/ci.yml`
 - 创建：`.github/workflows/release.yml`
 
-- [ ] **步骤 1：写入 CI workflow**
+- [x] **步骤 1：写入 CI workflow**
 
 写入 `.github/workflows/ci.yml`：
 
@@ -461,7 +461,7 @@ jobs:
         run: npx --yes skills@latest add . --list
 ```
 
-- [ ] **步骤 2：写入发布 workflow**
+- [x] **步骤 2：写入发布 workflow**
 
 写入 `.github/workflows/release.yml`：
 
@@ -495,7 +495,7 @@ jobs:
         run: npm publish --provenance --access public
 ```
 
-- [ ] **步骤 3：校验 YAML 语法**
+- [x] **步骤 3：校验 YAML 语法**
 
 运行：
 
@@ -505,7 +505,7 @@ python3 -c "import yaml; [yaml.safe_load(open(p)) for p in ['.github/workflows/c
 
 预期输出：`yaml ok`。
 
-- [ ] **步骤 4：本地运行 CI 的检查**
+- [x] **步骤 4：本地运行 CI 的检查**
 
 运行：
 
@@ -523,7 +523,7 @@ npx --yes skills@latest add . --list
 
 预期：输出包含 `ubuntu-ios`。若网络不可用导致失败，记录错误并在下一步继续；不要修改 skill 布局来绕过。
 
-- [ ] **步骤 5：Commit**
+- [x] **步骤 5：Commit**
 
 ```bash
 git add .github/workflows/ci.yml .github/workflows/release.yml
@@ -536,7 +536,7 @@ git commit -m "ci: add package checks and npm release workflow"
 
 **文件：** 无新增；只验证。
 
-- [ ] **步骤 1：运行完整检查**
+- [x] **步骤 1：运行完整检查**
 
 运行：
 
@@ -546,7 +546,7 @@ npm test
 
 预期：退出码 0。
 
-- [ ] **步骤 2：检查 tarball 内容**
+- [x] **步骤 2：检查 tarball 内容**
 
 运行：
 
@@ -574,7 +574,7 @@ package/skills/ubuntu-ios/scripts/setup.sh
 package/skills/ubuntu-ios/scripts/verify.sh
 ```
 
-- [ ] **步骤 3：确认脚本可执行位保留**
+- [x] **步骤 3：确认脚本可执行位保留**
 
 运行：
 
@@ -585,7 +585,7 @@ tar -tvzf /tmp/ubuntu-ios-skill-pack/ubuntu-ios-skill-1.0.0.tgz \
 
 预期：三行均以 `-rwxr-xr-x` 开头。
 
-- [ ] **步骤 4：确认 skill 可被发现**
+- [x] **步骤 4：确认 skill 可被发现**
 
 运行：
 
@@ -595,7 +595,7 @@ npx --yes skills@latest add . --list
 
 预期：输出包含 `ubuntu-ios`。
 
-- [ ] **步骤 5：确认工作区干净**
+- [x] **步骤 5：确认工作区干净**
 
 运行：
 
@@ -605,7 +605,7 @@ git status --short
 
 预期：无输出。
 
-- [ ] **步骤 6：汇报结果**
+- [x] **步骤 6：汇报结果**
 
 汇报：
 
