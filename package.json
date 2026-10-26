@@ -1,0 +1,42 @@
+{
+  "name": "ubuntu-ios-skill",
+  "version": "1.0.0",
+  "description": "Agent skill: set up, verify, and operate the Ubuntu iOS toolchain (Swift + xtool + rcodesign + pymobiledevice3) to build and ship iOS apps from Linux without a Mac.",
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "claude-code",
+    "codex",
+    "cursor",
+    "opencode",
+    "ios",
+    "swift",
+    "swiftui",
+    "ubuntu",
+    "linux",
+    "xtool",
+    "rcodesign",
+    "pymobiledevice3",
+    "testflight"
+  ],
+  "license": "MIT",
+  "author": "luozhouyang",
+  "files": [
+    "skills/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luozhouyang/ubuntu-ios-skill.git"
+  },
+  "homepage": "https://github.com/luozhouyang/ubuntu-ios-skill#readme",
+  "bugs": {
+    "url": "https://github.com/luozhouyang/ubuntu-ios-skill/issues"
+  },
+  "scripts": {
+    "test": "node tools/check-version.mjs && bash -n skills/ubuntu-ios/scripts/*.sh && npm pack --dry-run"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
