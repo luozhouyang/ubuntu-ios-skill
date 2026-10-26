@@ -36,6 +36,7 @@
     "test": "node tools/check-version.mjs && bash -n skills/ubuntu-ios/scripts/*.sh && npm pack --dry-run"
   },
   "publishConfig": {
+    "registry": "https://registry.npmjs.org",
     "access": "public",
     "provenance": true
   }

@@ -88,6 +88,28 @@ npx skills add . --list  # verify skill discovery
 Releases are published from `v*` tags through GitHub Actions with npm
 provenance.
 
+## Publishing
+
+The first release creates the package name:
+
+```bash
+npm login
+npm publish --access public
+```
+
+`publishConfig.registry` pins the target to `https://registry.npmjs.org`, so a
+local npm mirror does not redirect the publish. If npm refuses to generate
+provenance outside CI, add `--no-provenance` to the first manual publish.
+
+After the first publish, configure npmjs.com → the package's Settings →
+Trusted Publisher for this repository and `.github/workflows/release.yml`.
+Subsequent releases come from tags:
+
+```bash
+npm version minor
+git push --follow-tags
+```
+
 ## License
 
 MIT
