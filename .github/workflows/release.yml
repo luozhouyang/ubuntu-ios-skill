@@ -1,0 +1,27 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
+      - name: Verify package
+        run: npm test
+      - name: Publish
+        run: npm publish --provenance --access public
