@@ -163,7 +163,7 @@ ubuntu-ios ship --upload
 
 Physical iPhone:
 
-1. Connect USB, unlock, tap **Trust**.
+1. Connect USB with a data-capable cable (charge-only cables can enumerate then drop), unlock, tap **Trust**.
 2. `ubuntu-ios doctor --device` must report a paired device.
 3. Run `xtool auth` once for device deploys.
 4. Run `device-run.sh` from the project directory.
@@ -176,7 +176,7 @@ Physical iPhone:
 | --- | --- |
 | `$HOME/src/ubuntu-ios-toolchain` | Default checkout used by `scripts/setup.sh` |
 | `$HOME/.local/swift-6.3.3` | Swift toolchain |
-| `$HOME/.local/ubuntu-ios-toolchain` | Private libplist/libimobiledevice prefix |
+| `$HOME/.local/ubuntu-ios-toolchain` | Private libplist/libimobiledevice prefix; its `bin/` has newer `idevicepair`/`idevicedevmodectl` |
 | `$HOME/.local/bin/ubuntu-ios` | Launcher that exports the private library paths |
 | `$HOME/.local/bin/xtool`, `rcodesign`, `ipsw` | Build/sign/device tools |
 | `$HOME/.swiftpm/swift-sdks/darwin.artifactbundle` | Registered Darwin SDK, OAM server, Darwin tools |
@@ -186,6 +186,8 @@ Physical iPhone:
 | `$HOME/.cache/omarchy-apple-dev` | Pinned xtool/OAM sources and builds |
 
 Run `xtool`, `swift`, and `rcodesign` through `~/.local/bin/ubuntu-ios` or with the launcher's `LD_LIBRARY_PATH`. Calling `xtool` directly without the private prefix produces `libplist-2.0.so.12: cannot open shared object file`.
+
+On iOS 26 devices, first swap to a known data-capable cable: a charge-only third-party cable can enumerate the phone and then fail with `RX transfer stalled`. If the cable is good, Ubuntu's packaged `usbmuxd 1.1.1` (2020) can still connect and then fail with the same `RX transfer stalled` or `lockdownd error -8`. The launcher puts the private prefix's `idevicepair`/`idevicedevmodectl` 1.4.0 first. If the stall persists, unload `ipheth` and `apple_mfi_fastcharge`, and if needed build usbmuxd from git HEAD. See `references/troubleshooting.md`.
 
 ## Guardrails
 
@@ -208,7 +210,8 @@ Read `references/troubleshooting.md` for symptom → cause → fix details. The 
 | SwiftPM clone stalls / re-clones | `scripts/prefetch-swiftpm-repo.sh` with the exact cache path |
 | `swift sdk list` lacks `darwin` | `ubuntu-ios sdk /path/to/Xcode.xip` |
 | `Too many open files` | `ulimit -n 65536` |
-| No device detected | start `usbmuxd`; unlock and trust the iPhone |
+| No device detected | data-capable cable; start `usbmuxd`; unlock and trust the iPhone |
+| `RX transfer stalled` / phone drops after connect | swap in an official/data cable; then check `usbmuxd` and `ipheth` |
 
 ## References
 

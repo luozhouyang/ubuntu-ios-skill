@@ -205,7 +205,7 @@ create_launcher() {
   mkdir -p "$HOME/.local/bin"
   cat > "$HOME/.local/bin/ubuntu-ios" <<EOF
 #!/usr/bin/env bash
-export PATH="$SWIFT_PREFIX/usr/bin:\$HOME/.local/bin:\$PATH"
+export PATH="$SWIFT_PREFIX/usr/bin:$PREFIX/bin:\$HOME/.local/bin:\$PATH"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/lib/x86_64-linux-gnu/pkgconfig:\${PKG_CONFIG_PATH:-}"
 export LD_LIBRARY_PATH="$PREFIX/lib:$PREFIX/lib/x86_64-linux-gnu:\${LD_LIBRARY_PATH:-}"
 exec "$WORKDIR/ubuntu-ios" "\$@"

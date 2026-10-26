@@ -209,7 +209,57 @@ Start `usbmuxd`:
 sudo systemctl start usbmuxd
 ```
 
-The Ubuntu service is udev-triggered; without a phone it may be inactive. `scripts/setup.sh` starts it on a best-effort basis.
+The Ubuntu service is udev-triggered; without a phone it may be inactive. `scripts/setup.sh` starts it on a best-effort basis. If the service is running but the device still disappears, try the official/data cable first; see the iOS 26 stall section below.
+
+### iOS 26: `RX transfer stalled` or `lockdownd error -8`
+
+**Check the cable first.** A charge-only or poor-quality third-party cable can enumerate the iPhone (serial number visible, configuration 4) and then stall the bulk endpoint on the first RX transfer. In a confirmed case, replacing a third-party charging cable with the official Apple cable fixed pairing immediately, with no change to `usbmuxd`, libimobiledevice, or kernel drivers. Use a known data-capable cable connected directly to the mainboard before changing the software stack.
+
+If the cable is known-good, Ubuntu 24.04 ships `usbmuxd 1.1.1` from 2020. It can enumerate an iOS 26 iPhone, set configuration 4, then fail during the bulk transfer:
+
+```text
+Connected to v2.0 device ... 
+RX transfer stalled for device ...
+Removed device ...
+```
+
+or:
+
+```text
+ERROR: Could not connect to lockdownd, error code -8
+```
+
+Two kernel drivers can make this worse: `ipheth` (USB tethering) and `apple_mfi_fastcharge`. Keep the phone unlocked, then try:
+
+```bash
+sudo systemctl stop usbmuxd
+sudo modprobe -r ipheth apple_mfi_fastcharge
+printf 'blacklist ipheth\nblacklist apple_mfi_fastcharge\n' | \
+  sudo tee /etc/modprobe.d/blacklist-iphone-usb.conf
+sudo systemctl start usbmuxd
+```
+
+Blacklisting `ipheth` disables USB tethering; remove that line if you need it. Replug the iPhone and pair with the newer private tools:
+
+```bash
+export PATH="$HOME/.local/ubuntu-ios-toolchain/bin:$PATH"
+export LD_LIBRARY_PATH="$HOME/.local/ubuntu-ios-toolchain/lib:$HOME/.local/ubuntu-ios-toolchain/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
+idevicepair pair
+idevicepair validate
+```
+
+If the stall persists, build usbmuxd from git HEAD (the project has many fixes since the 2020 release) and run that binary instead of `/usr/sbin/usbmuxd`:
+
+```bash
+git clone https://github.com/libimobiledevice/usbmuxd.git
+cd usbmuxd
+./autogen.sh --prefix="$HOME/.local/ubuntu-ios-toolchain"
+make -j"$(nproc)"
+sudo systemctl stop usbmuxd
+sudo ./usbmuxd --user usbmux -f -v
+```
+
+For persistence, point a systemd drop-in's `ExecStart` at the built binary. Keep the phone unlocked during pairing; `idevicedevmodectl enable` can enable Developer Mode later but reboots the device.
 
 ### Visible UDID but pairing fails
 
@@ -227,7 +277,7 @@ Unlock the iPhone and tap **Trust**. Common states reported by `ubuntu-ios docto
 - trust denied on the device
 - device locked; unlock it first
 
-If USB visibility itself fails, check the cable, USB port, udev rules, and `usbmuxd` logs.
+If USB visibility itself fails, check the cable first (a charge-only cable can show a UDID and then stall), then the USB port, udev rules, and `usbmuxd` logs.
 
 ### `xtool auth` / device deploy fails
 
