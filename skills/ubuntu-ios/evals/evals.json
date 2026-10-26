@@ -51,6 +51,33 @@
         "Keeps the .p8 key outside the repository",
         "Mentions that upload does not submit the app for review"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "xtool auth login with my free Apple ID fails with 'Error: This action cannot be completed at this time. (-80045)'. When I checked with openssl, gsa.apple.com returned 'Verify return code: 0 (ok)', and a later attempt gave HTTP 503 from GsService2. I found PR #244 and PR #348 upstream. What is actually wrong, and how do I log in without patching xtool?",
+      "expected_output": "Explains that -80045 and the 503 are GrandSlam client-identity rejections, not TLS or password problems; confirms TLS is fine; recommends upgrading to xtool 1.24.0+ where client-info/User-Agent and the anisette provider agree; warns against hand-patching a cached fork; runs login in a real terminal.",
+      "files": [],
+      "expectations": [
+        "Identifies the failure as a client-info / User-Agent mismatch rather than bad credentials or TLS",
+        "Does not treat the 503 as a certificate problem or suggest disabling TLS validation",
+        "Checks the xtool version and upgrades to 1.24.0 or newer",
+        "Advises against hand-patching a fork because headers and the anisette provider must agree",
+        "Runs xtool auth login in an interactive terminal for the password and 2FA prompt",
+        "Warns that a different xtool binary wipes the saved token"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "xtool sdk install is downloading toolset-x86_64.tar.gz at about 70 KB/s through my proxy and has been sitting there for 40 minutes. I already have Clash on 127.0.0.1:7897. I do not want to modify xtool's source. How do I make this finish, and what breaks if I kill it now?",
+      "expected_output": "Explains that xtool streams the assets into tar with no cache or resume, pre-downloads them with aria2c, points XTL_TOOLSET_TARBALL and XTL_OAM_TARBALL at the local files, removes stale pid locks, and runs xtool sdk install with the Swift toolchain on PATH.",
+      "files": [],
+      "expectations": [
+        "States that the download has no resume and restarts from zero",
+        "Uses aria2c with the proxy and multiple connections to pre-download both assets",
+        "Uses XTL_TOOLSET_TARBALL and XTL_OAM_TARBALL instead of patching SDKBuilder.swift",
+        "Puts the Swift toolchain's usr/bin on PATH before running xtool sdk install",
+        "Warns that a failed install deletes the previous SDK, so verify the archives first"
+      ]
     }
   ]
 }

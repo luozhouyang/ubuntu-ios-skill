@@ -23,6 +23,7 @@ Collect these facts before changing the machine:
 - A legally obtained `Xcode*.xip` from Apple Developer Downloads. Match generations: Swift 6.3.x ↔ Xcode 26, Swift 6.4.x ↔ Xcode 27.
 - A free Apple ID (to download Xcode). A paid Apple Developer membership is required for normal TestFlight/App Store distribution.
 - Network access. If the host uses a proxy, read "Proxy and slow downloads" before running the installer; this is the most common failure point.
+- `xtool` 1.24.0 or newer for free-Apple-ID login and device deploys. Older builds (including most forks in `$HOME/.cache/omarchy-apple-dev`) send a GrandSlam client-info/User-Agent pair that Apple now rejects with `-80045` or HTTP 503. Check with `xtool --version`; see "Apple ID login (GrandSlam)" in `references/troubleshooting.md`.
 
 Agents run in a non-interactive shell. Before a script that calls `sudo`, either the user runs `sudo -v` in that terminal, or `SUDO_ASKPASS` is configured. The bundled scripts fail fast with guidance instead of hanging.
 
@@ -101,10 +102,18 @@ If the xtool SDK step still downloads slowly, the assets are:
 
 ```text
 https://github.com/xtool-org/darwin-tools-linux-llvm/releases/download/v1.1.0/toolset-x86_64.tar.gz
-https://github.com/xtool-org/OpenAppleMacros/releases/download/v1.3.0/OpenAppleMacrosServer-x86_64
+https://github.com/xtool-org/OpenAppleMacros/releases/download/v1.4.1/OpenAppleMacrosServer-x86_64.tar.gz   # xtool 1.24.0; older builds use v1.3.0
 ```
 
-`aria2c --all-proxy=http://127.0.0.1:7897 -x 8 -s 8` downloads them much faster. Making xtool consume local copies requires a source patch keyed to the pinned xtool commit; treat that as an advanced workaround, not the default. See `references/troubleshooting.md`.
+The versions are pinned in `Sources/XToolSupport/SDKBuilder.swift` of the xtool you actually run. xtool streams both into `tar` with no cache and no resume, so a slow proxy restarts from zero on every drop. `aria2c --all-proxy=http://127.0.0.1:7897 -x 8 -s 8 -k 1M` downloads them much faster, and xtool ≥ 1.24.0 consumes the local copies directly — **no source patch needed**:
+
+```bash
+export XTL_TOOLSET_TARBALL="$HOME/.cache/xtool/sdk-assets/toolset-x86_64.tar.gz"
+export XTL_OAM_TARBALL="$HOME/.cache/xtool/sdk-assets/OpenAppleMacrosServer-x86_64.tar.gz"
+xtool sdk install --slim /path/to/Xcode.xip
+```
+
+Both variables accept a file or a directory. See `references/troubleshooting.md` for the full recipe and the failure modes around it.
 
 ## Verification
 
@@ -165,10 +174,18 @@ Physical iPhone:
 
 1. Connect USB with a data-capable cable (charge-only cables can enumerate then drop), unlock, tap **Trust**.
 2. `ubuntu-ios doctor --device` must report a paired device.
-3. Run `xtool auth` once for device deploys.
-4. Run `device-run.sh` from the project directory.
+3. Enable **Developer Mode** on the phone (Settings → Privacy & Security → Developer Mode). `idevicedevmodectl reveal` only makes the menu appear; `idevicedevmodectl enable` fails when a passcode is set, so flip it by hand and accept the reboot.
+4. Run `xtool auth login` once, in a real terminal (not through a non-TTY harness; it needs to prompt for the password and 2FA).
+5. Run `xtool dev run --usb` from the converted project directory (`.build/linux-ios`). It builds, provisions, signs, installs, and launches.
 
 `idevice_id -l` answers USB visibility; `idevicepair validate` answers trust/pairing. They fail for different reasons, so diagnose them separately.
+
+Free-account facts that surprise people:
+
+- The installed bundle ID is prefixed with the team ID: `com.example.app` → `XTL-<TEAMID>.com.example.app`. Device tools need the prefixed ID.
+- The provisioning profile expires after 7 days; re-run `xtool dev run --usb` to refresh it. App data survives the reinstall.
+- Keep exactly one `~/.local/bin/xtool` symlink. The saved login token is bound to the anisette provider of the binary that created it, so running any other xtool build — even `xtool auth status` — silently wipes it and forces a fresh interactive login.
+- Verify an install without trusting the progress bars: `pymobiledevice3 apps list --udid <UDID>` and `pymobiledevice3 developer dvt launch --udid <UDID> <bundle-id>`.
 
 ## Important paths
 
@@ -206,12 +223,20 @@ Read `references/troubleshooting.md` for symptom → cause → fix details. The 
 | `lzma.h file not found` during xtool build | `sudo apt-get install -y liblzma-dev zlib1g-dev` |
 | apt `Unable to connect` behind a proxy | apt proxy config; sudo strips proxy env |
 | `HTTPClientError.connectTimeout` in `xtool sdk build` | `export XTL_HTTP_PROXY=host:port` |
+| SDK toolset/OAM download crawls or restarts | pre-download with `aria2c`, then `XTL_TOOLSET_TARBALL` / `XTL_OAM_TARBALL` |
+| Server stalls for 40+ min during `xtool sdk install` | check `~/.cache/xtool/sdk-assets`; downloads have no resume |
+| `Could not find executable 'swiftc' in PATH` at the end of SDK install | Swift toolchain missing from `PATH`; old SDK was deleted — retry with `$HOME/.local/swift-6.3.3/usr/bin` first |
+| `Darwin SDK is out of date ... slim mode` | SDK `epoch` too old for the xtool you run; rebuild it |
 | `libplist-2.0.so.12` missing | use `~/.local/bin/ubuntu-ios` |
 | SwiftPM clone stalls / re-clones | `scripts/prefetch-swiftpm-repo.sh` with the exact cache path |
 | `swift sdk list` lacks `darwin` | `ubuntu-ios sdk /path/to/Xcode.xip` |
 | `Too many open files` | `ulimit -n 65536` |
+| Apple ID login: `(-80045)` or HTTP 503 from `GsService2` | upgrade xtool to ≥ 1.24.0; do not patch a fork — identity mismatch, not TLS |
+| `xtool auth status` says logged in, next command says not | a different xtool binary wiped the token; use one binary, log in again |
+| `auth login` → `Operation unsupported` | needs a real TTY; run it in a terminal window |
 | No device detected | data-capable cable; start `usbmuxd`; unlock and trust the iPhone |
 | `RX transfer stalled` / phone drops after connect | swap in an official/data cable; then check `usbmuxd` and `ipheth` |
+| `~/.local/bin/xtool` shows `(dirty)` or unexpected behaviour | a hand-patched fork is on the symlink; point it at the official build |
 
 ## References
 

@@ -50,6 +50,15 @@ It then executes the toolchain repository's `ubuntu-ios` dispatcher. `doctor`, `
 
 The cached bundle (`$HOME/.cache/xtool/darwin-*.xtoolsdk`) is toolchain-independent. After a Swift toolchain swap, re-register it with `install-toolchain-upstream.sh --repair` instead of re-extracting Xcode.
 
+The bundle also records the **xtool SDK format** it was built with:
+
+```bash
+cat "$HOME/.swiftpm/swift-sdks/darwin.artifactbundle/darwin-sdk-version.txt"
+# epoch=4,darwinTools=1.1.0,oam=1.4.1   ← xtool 1.24.0
+```
+
+`epoch` is the format version; `darwinTools` and `oam` are the toolset and OpenAppleMacros versions. A newer xtool rejects an older bundle outright instead of migrating it (see `Darwin SDK is out of date` in `troubleshooting.md`), so the SDK must be rebuilt whenever xtool itself is upgraded. The values are compile-time constants in `Sources/XToolSupport/SDKBuilder.swift`, which is also where the downloaded asset versions come from. Nothing about the toolchain swap is recorded on the device or in the Apple ID token.
+
 ## Build and signing flow
 
 `ubuntu-ios build` delegates to `xtool dev build`:
