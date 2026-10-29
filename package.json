@@ -33,7 +33,8 @@
     "url": "https://github.com/luozhouyang/ubuntu-ios-skill/issues"
   },
   "scripts": {
-    "test": "node tools/check-version.mjs && bash -n skills/ubuntu-ios/scripts/*.sh && npm pack --dry-run"
+    "test": "node tools/check-version.mjs && bash -n skills/ubuntu-ios/scripts/*.sh && npm pack --dry-run",
+    "version": "node tools/sync-version.mjs"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

@@ -90,25 +90,30 @@ provenance.
 
 ## Publishing
 
-The first release creates the package name:
+Releases are cut locally and published by GitHub Actions from `v*` tags:
+
+```bash
+npm version patch   # or minor / major
+git push --follow-tags
+```
+
+`npm version` bumps `package.json`, runs `tools/sync-version.mjs` to update
+`skills/ubuntu-ios/SKILL.md`, and commits both so the tag passes `npm test`.
+`release.yml` then publishes with npm provenance through Trusted Publisher,
+which must be configured at npmjs.com → the package's Settings → Trusted
+Publisher (this repository, workflow `release.yml`).
+
+The initial `1.0.0` was published manually. For a manual publish:
 
 ```bash
 npm login
-npm publish --access public
+npm publish --access public --no-provenance
 ```
 
 `publishConfig.registry` pins the target to `https://registry.npmjs.org`, so a
-local npm mirror does not redirect the publish. If npm refuses to generate
-provenance outside CI, add `--no-provenance` to the first manual publish.
-
-After the first publish, configure npmjs.com → the package's Settings →
-Trusted Publisher for this repository and `.github/workflows/release.yml`.
-Subsequent releases come from tags:
-
-```bash
-npm version minor
-git push --follow-tags
-```
+local npm mirror does not redirect the publish. With npm 12+, a 2FA publish may
+be staged; approve it with `npx npm@latest stage list` and
+`npx npm@latest stage approve <stage-id>`.
 
 ## License
 
