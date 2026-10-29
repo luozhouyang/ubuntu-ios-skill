@@ -3,7 +3,7 @@ name: ubuntu-ios
 description: Set up, verify, and operate the Ubuntu iOS toolchain (Swift + xtool + rcodesign + pymobiledevice3) to build, sign, and ship Swift/SwiftUI iOS apps from Ubuntu Linux without Xcode or a Mac. Use this skill whenever the user mentions building iOS apps on Ubuntu or Linux, installing Swift 6.x with an Xcode .xip SDK, xtool, rcodesign, pymobiledevice3, iPhone USB pairing on Linux, TestFlight uploads from Linux, or errors such as libplist-2.0.so.12, HTTPClientError.connectTimeout, swift-syntax/swift-png clone stalls, or a missing darwin SDK — even if the user does not say "ubuntu-ios" explicitly.
 metadata:
   author: luozhouyang
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Ubuntu iOS Toolchain

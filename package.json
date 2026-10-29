@@ -1,6 +1,6 @@
 {
   "name": "ubuntu-ios-skill",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Agent skill: set up, verify, and operate the Ubuntu iOS toolchain (Swift + xtool + rcodesign + pymobiledevice3) to build and ship iOS apps from Linux without a Mac.",
   "keywords": [
     "agent-skills",
